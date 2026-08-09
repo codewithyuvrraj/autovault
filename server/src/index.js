@@ -10,6 +10,7 @@ dotenv.config();
 const carsRouter = require('./routes/cars');
 const categoriesRouter = require('./routes/categories');
 const authRouter = require('./routes/auth');
+const { bootstrap } = require('./bootstrap');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5001;
@@ -65,6 +66,27 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚗 Car Platform API running at http://localhost:${PORT}`);
+// Bootstrap the schema + seed data on a fresh database, then start serving.
+// Retried with backoff because hosted DBs (TiDB/Aiven) can briefly reject the
+// first connection during provisioning. A final failure is non-fatal: the API
+// still starts (health endpoint reports DB state) and bootstrap is retried on
+// the next deploy.
+async function startWithRetry(attempts = 5) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await bootstrap();
+      console.log(res.seeded ? '🌱 Database bootstrapped with seed data' : '✅ Database ready (data already present)');
+      return;
+    } catch (err) {
+      console.error(`⚠️ Bootstrap attempt ${i + 1}/${attempts} failed:`, err.message);
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 4000));
+    }
+  }
+  console.error('⚠️ Giving up on bootstrap after multiple attempts — API will still start.');
+}
+
+startWithRetry().finally(() => {
+  app.listen(PORT, () => {
+    console.log(`🚗 Car Platform API running at http://localhost:${PORT}`);
+  });
 });

@@ -1,0 +1,50 @@
+# Render Blueprint — AutoVault API
+# Deploy: https://dashboard.render.com → New → Blueprint → select the autovault repo.
+# The service is created on the FREE plan (no credit card needed). Variables with
+# `sync: false` are left blank for you to fill in after creation:
+#   Dashboard → your autovault-api service → Environment → Edit.
+#
+# Required values (see README → "Deploying the backend"):
+#   MYSQL_HOST/PORT/USER/PASSWORD/DATABASE  → from your free MySQL (TiDB Cloud or Aiven)
+#   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET → same Google OAuth values as local
+#   GOOGLE_CALLBACK_URL → https://<your-service-url>.onrender.com/api/auth/google/callback
+#   FRONTEND_URL        → your Netlify site URL (e.g. https://autovault.netlify.app)
+#   CLIENT_ORIGIN       → your Netlify site URL (same as FRONTEND_URL)
+services:
+  - type: web
+    name: autovault-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_PORT
+        sync: false
+      - key: MYSQL_USER
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+      - key: MYSQL_DATABASE
+        sync: false
+      - key: MYSQL_SSL
+        value: "true"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true

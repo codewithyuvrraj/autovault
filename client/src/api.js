@@ -3,7 +3,7 @@
 //   VITE_API_URL=https://your-api.example.com npm run build
 // NOTE: cross-origin auth needs the server to allow the frontend origin with
 // credentials (Access-Control-Allow-Credentials) — see server CORS config.
-export const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+export const API_BASE = (import.meta.env?.VITE_API_URL || '/api').replace(/\/+$/, '');
 const CROSS_ORIGIN = API_BASE.startsWith('http');
 
 async function handle(res) {

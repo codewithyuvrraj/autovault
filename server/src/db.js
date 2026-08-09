@@ -1,6 +1,10 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+// Hosted MySQL (Render + TiDB Cloud / Aiven) requires TLS — enable it with MYSQL_SSL=true.
+// rejectUnauthorized is relaxed because free tiers use self-signed/rotating CAs.
+const ssl = process.env.MYSQL_SSL === 'true' ? { rejectUnauthorized: false } : undefined;
+
 // Connection pool to MySQL
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST || '127.0.0.1',
@@ -11,7 +15,9 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: 10000,
   dateStrings: true,
+  ...(ssl ? { ssl } : {}),
 });
 
 // Simple query helper

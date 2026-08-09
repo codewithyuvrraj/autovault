@@ -23,7 +23,10 @@ function configured() {
 
 const cookieOptions = () => ({
   httpOnly: true,
-  sameSite: 'lax',
+  // The deployed frontend (Netlify) and API (Render) are different sites, so the
+  // session cookie must be sent cross-site: SameSite=None + Secure (prod only).
+  // Locally everything is on localhost, where 'lax' is correct.
+  sameSite: IS_PROD ? 'none' : 'lax',
   secure: IS_PROD,
   path: '/',
 });
@@ -60,7 +63,8 @@ router.get('/google/callback', async (req, res) => {
 
   // Verify the anti-CSRF state token before doing anything else
   const expectedState = req.cookies && req.cookies[STATE_COOKIE];
-  res.clearCookie(STATE_COOKIE, { path: '/' });
+  // Match the attributes the cookie was set with, or the clear can be ignored by browsers
+  res.clearCookie(STATE_COOKIE, cookieOptions());
   if (error || !code || !expectedState || !state || state !== expectedState) {
     return res.redirect(`${FRONTEND_URL}/?auth=error`);
   }
