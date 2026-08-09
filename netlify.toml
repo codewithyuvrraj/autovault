@@ -1,0 +1,19 @@
+# AutoVault — Netlify build settings
+# These are read automatically when you import the GitHub repo, so no
+# manual fields are needed in the Netlify dashboard.
+
+[build]
+  command = "cd client && npm ci && npm run build"
+  publish = "client/dist"
+
+# SPA fallback: unknown paths serve the app (so deep links work)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Cache the built assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
