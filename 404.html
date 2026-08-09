@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AutoVault</title>
+  <!-- GitHub Pages SPA fallback: keep the path and load the app entry -->
+  <script>
+    (function () {
+      try {
+        sessionStorage.setItem(
+          'autovault:redirect',
+          location.pathname.replace(/^\/autovault/, '') || '/'
+        );
+      } catch (e) {}
+      location.replace('/autovault/');
+    })();
+  </script>
+</head>
+<body></body>
+</html>
