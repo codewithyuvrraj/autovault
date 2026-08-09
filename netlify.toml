@@ -6,6 +6,11 @@
   command = "cd client && npm ci && npm run build"
   publish = "client/dist"
 
+# Point the deployed frontend at the hosted API (Vite exposes this as
+# import.meta.env.VITE_API_URL — see client/src/api.js)
+[build.environment]
+  VITE_API_URL = "https://autovault-api-ruze.onrender.com"
+
 # This static site has no API backend: /api/* must return 404 (not the SPA shell),
 # so the app's fetch calls fail cleanly instead of receiving index.html with HTTP 200.
 [[redirects]]
