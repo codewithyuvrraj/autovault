@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, asArray } from '../api.js';
 import { useAuth } from '../auth.jsx';
 
 const EMPTY = {
@@ -24,7 +24,7 @@ export default function PublishPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api.listCategories().then(setCategories).catch(() => {});
+    api.listCategories().then((d) => setCategories(asArray(d))).catch(() => {});
     return () => previews.forEach((p) => URL.revokeObjectURL(p));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

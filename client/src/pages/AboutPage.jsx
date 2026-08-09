@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, asArray } from '../api.js';
 
 export default function AboutPage() {
   const [stats, setStats] = useState({ cars: 0, categories: 0, cities: 0 });
 
   useEffect(() => {
-    api.listCars({ sort: 'newest' }).then((cars) => {
+    api.listCars({ sort: 'newest' }).then((data) => {
+      const cars = asArray(data);
       setStats({
         cars: cars.length,
         categories: 10,

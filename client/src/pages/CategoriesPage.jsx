@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, asArray } from '../api.js';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -16,7 +16,7 @@ export default function CategoriesPage() {
 
   function load() {
     setLoading(true);
-    api.listCategories().then(setCategories).catch(() => setCategories([])).finally(() => setLoading(false));
+    api.listCategories().then((d) => setCategories(asArray(d))).catch(() => setCategories([])).finally(() => setLoading(false));
   }
 
   useEffect(() => {

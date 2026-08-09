@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, asArray } from '../api.js';
 import CarCard from '../components/CarCard.jsx';
 
 export default function HomePage() {
@@ -10,11 +10,21 @@ export default function HomePage() {
   const [featured, setFeatured] = useState([]);
   const [latest, setLatest] = useState([]);
   const [stats, setStats] = useState({ cars: 0, categories: 0, cities: 0 });
+  const [offline, setOffline] = useState(false);
 
   useEffect(() => {
-    api.listCategories().then(setCategories).catch(() => {});
-    api.listCars({ featured: '1', sort: 'popular' }).then(setFeatured).catch(() => {});
-    api.listCars({ sort: 'newest' }).then(setLatest).catch(() => {});
+    let mounted = true;
+    const failures = [];
+    const fail = () => failures.push(true);
+    api.listCategories().then((d) => mounted && setCategories(asArray(d))).catch(fail);
+    api.listCars({ featured: '1', sort: 'popular' }).then((d) => mounted && setFeatured(asArray(d))).catch(fail);
+    api.listCars({ sort: 'newest' }).then((d) => mounted && setLatest(asArray(d))).catch(fail);
+    // If the API is unreachable (e.g. this static site has no backend), tell the user
+    // instead of leaving endless spinners.
+    const t = setTimeout(() => {
+      if (mounted && failures.length) setOffline(true);
+    }, 2000);
+    return () => { mounted = false; clearTimeout(t); };
   }, []);
 
   useEffect(() => {
@@ -63,6 +73,20 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {offline && (
+        <div className="container" style={{ marginTop: 26 }}>
+          <div className="alert error" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+            <span>⚠️ <strong>Live demo mode:</strong> the API server isn't reachable from this static site, so listings can't load here. Run the app locally or connect the backend to see cars.</span>
+            <button
+              type="button"
+              aria-label="Dismiss notice"
+              onClick={() => setOffline(false)}
+              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 16, fontWeight: 700, padding: 4, lineHeight: 1 }}
+            >✕</button>
+          </div>
+        </div>
+      )}
 
       {/* ================= CATEGORIES ================= */}
       <section className="section" style={{ paddingTop: 56 }}>

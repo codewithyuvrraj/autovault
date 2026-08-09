@@ -1,10 +1,26 @@
-const BASE = '/api';
+// API base. Defaults to the relative /api path (proxied to the backend in dev).
+// For a deployed frontend pointed at a hosted API, build with:
+//   VITE_API_URL=https://your-api.example.com npm run build
+const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+const CROSS_ORIGIN = BASE.startsWith('http');
 
 async function handle(res) {
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (_) {
+    // Non-JSON body — e.g. a static host's SPA fallback serving index.html with
+    // HTTP 200 for /api/*. Never silently resolve as {}: that turns array
+    // responses into objects and crashes pages that call .slice()/.map().
+  }
+  if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+  if (data === null) throw new Error(`Unexpected response from server (HTTP ${res.status})`);
   return data;
 }
+
+// Static hosts (Netlify/GitHub Pages), proxies and errors can hand back non-array
+// bodies for list endpoints. Guarantee arrays so pages can never crash on .map()/.slice().
+export const asArray = (data) => (Array.isArray(data) ? data : []);
 
 export const api = {
   // Cars
@@ -41,10 +57,10 @@ export const api = {
 
   // Auth (Google OAuth session lives in an httpOnly cookie)
   me() {
-    return fetch(`${BASE}/auth/me`, { credentials: 'same-origin' }).then(handle);
+    return fetch(`${BASE}/auth/me`, { credentials: CROSS_ORIGIN ? 'include' : 'same-origin' }).then(handle);
   },
   logout() {
-    return fetch(`${BASE}/auth/logout`, { method: 'POST', credentials: 'same-origin' }).then(handle);
+    return fetch(`${BASE}/auth/logout`, { method: 'POST', credentials: CROSS_ORIGIN ? 'include' : 'same-origin' }).then(handle);
   },
 };
 

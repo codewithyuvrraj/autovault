@@ -6,6 +6,13 @@
   command = "cd client && npm ci && npm run build"
   publish = "client/dist"
 
+# This static site has no API backend: /api/* must return 404 (not the SPA shell),
+# so the app's fetch calls fail cleanly instead of receiving index.html with HTTP 200.
+[[redirects]]
+  from = "/api/*"
+  to = "/api-unavailable"
+  status = 404
+
 # SPA fallback: unknown paths serve the app (so deep links work)
 [[redirects]]
   from = "/*"

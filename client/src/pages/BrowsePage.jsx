@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, asArray } from '../api.js';
 import CarCard from '../components/CarCard.jsx';
 
 const SORTS = [
@@ -34,14 +34,14 @@ export default function BrowsePage() {
   const sort = params.get('sort') || 'newest';
 
   useEffect(() => {
-    api.listCategories().then(setCategories).catch(() => {});
+    api.listCategories().then((d) => setCategories(asArray(d))).catch(() => {});
   }, []);
 
   useEffect(() => {
     setLoading(true);
     api
       .listCars({ category, q, minPrice, maxPrice, fuel, transmission, condition, featured: featuredOnly ? '1' : '', sort })
-      .then(setCars)
+      .then((d) => setCars(asArray(d)))
       .catch(() => setCars([]))
       .finally(() => setLoading(false));
   }, [category, q, minPrice, maxPrice, fuel, transmission, condition, featuredOnly, sort]);
