@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // Site is hosted under /autovault/ on GitHub Pages
-  base: '/autovault/',
+  // Build target:  VITE_BASE_PATH=/autovault/ npm run build   (GitHub Pages)
+  //                npm run build                              (Netlify/Vercel at site root)
+  base: process.env.VITE_BASE_PATH || '/',
   server: {
     port: 5173,
     proxy: {
