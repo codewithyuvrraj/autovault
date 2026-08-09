@@ -1,5 +1,0 @@
-# This static site has no API backend: /api/* must return 404 (not the SPA shell),
-# so the app's fetch calls fail cleanly instead of receiving index.html with HTTP 200.
-/api/*    /api-unavailable    404
-# SPA fallback: deep links serve the app
-/*       /index.html          200

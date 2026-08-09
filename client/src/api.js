@@ -1,8 +1,10 @@
 // API base. Defaults to the relative /api path (proxied to the backend in dev).
 // For a deployed frontend pointed at a hosted API, build with:
 //   VITE_API_URL=https://your-api.example.com npm run build
-const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
-const CROSS_ORIGIN = BASE.startsWith('http');
+// NOTE: cross-origin auth needs the server to allow the frontend origin with
+// credentials (Access-Control-Allow-Credentials) — see server CORS config.
+export const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+const CROSS_ORIGIN = API_BASE.startsWith('http');
 
 async function handle(res) {
   let data = null;
@@ -14,6 +16,8 @@ async function handle(res) {
     // responses into objects and crashes pages that call .slice()/.map().
   }
   if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status})`);
+  // Intentional: a 2xx with an empty/non-JSON body is a broken response (HTML
+  // fallback, bad proxy) — reject loudly instead of handing pages junk.
   if (data === null) throw new Error(`Unexpected response from server (HTTP ${res.status})`);
   return data;
 }
@@ -28,39 +32,39 @@ export const api = {
     const qs = new URLSearchParams(
       Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
     ).toString();
-    return fetch(`${BASE}/cars${qs ? `?${qs}` : ''}`).then(handle);
+    return fetch(`${API_BASE}/cars${qs ? `?${qs}` : ''}`).then(handle);
   },
   getCar(id) {
-    return fetch(`${BASE}/cars/${id}`).then(handle);
+    return fetch(`${API_BASE}/cars/${id}`).then(handle);
   },
   createCar(formData) {
-    return fetch(`${BASE}/cars`, { method: 'POST', body: formData }).then(handle);
+    return fetch(`${API_BASE}/cars`, { method: 'POST', body: formData }).then(handle);
   },
   deleteCar(id) {
-    return fetch(`${BASE}/cars/${id}`, { method: 'DELETE' }).then(handle);
+    return fetch(`${API_BASE}/cars/${id}`, { method: 'DELETE' }).then(handle);
   },
 
   // Categories
   listCategories() {
-    return fetch(`${BASE}/categories`).then(handle);
+    return fetch(`${API_BASE}/categories`).then(handle);
   },
   createCategory(payload) {
-    return fetch(`${BASE}/categories`, {
+    return fetch(`${API_BASE}/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }).then(handle);
   },
   deleteCategory(id) {
-    return fetch(`${BASE}/categories/${id}`, { method: 'DELETE' }).then(handle);
+    return fetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' }).then(handle);
   },
 
   // Auth (Google OAuth session lives in an httpOnly cookie)
   me() {
-    return fetch(`${BASE}/auth/me`, { credentials: CROSS_ORIGIN ? 'include' : 'same-origin' }).then(handle);
+    return fetch(`${API_BASE}/auth/me`, { credentials: CROSS_ORIGIN ? 'include' : 'same-origin' }).then(handle);
   },
   logout() {
-    return fetch(`${BASE}/auth/logout`, { method: 'POST', credentials: CROSS_ORIGIN ? 'include' : 'same-origin' }).then(handle);
+    return fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: CROSS_ORIGIN ? 'include' : 'same-origin' }).then(handle);
   },
 };
 

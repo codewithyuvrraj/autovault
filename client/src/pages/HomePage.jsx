@@ -14,15 +14,15 @@ export default function HomePage() {
 
   useEffect(() => {
     let mounted = true;
-    const failures = [];
-    const fail = () => failures.push(true);
+    let failed = 0;
+    const fail = () => { failed += 1; };
     api.listCategories().then((d) => mounted && setCategories(asArray(d))).catch(fail);
     api.listCars({ featured: '1', sort: 'popular' }).then((d) => mounted && setFeatured(asArray(d))).catch(fail);
     api.listCars({ sort: 'newest' }).then((d) => mounted && setLatest(asArray(d))).catch(fail);
-    // If the API is unreachable (e.g. this static site has no backend), tell the user
-    // instead of leaving endless spinners.
+    // Only report offline when every request failed (i.e. the backend is truly
+    // unreachable — e.g. this static site has no API) — not on a partial hiccup.
     const t = setTimeout(() => {
-      if (mounted && failures.length) setOffline(true);
+      if (mounted && failed === 3) setOffline(true);
     }, 2000);
     return () => { mounted = false; clearTimeout(t); };
   }, []);

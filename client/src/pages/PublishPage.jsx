@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, asArray } from '../api.js';
+import { api, asArray, API_BASE } from '../api.js';
 import { useAuth } from '../auth.jsx';
 
 const EMPTY = {
@@ -112,7 +112,7 @@ export default function PublishPage() {
         {!user && (
           <div className="form-card" style={{ marginBottom: 20, padding: '16px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
             <span style={{ color: 'var(--text-dim)', fontSize: 14 }}>👤 <strong style={{ color: 'var(--text)' }}>Pro tip:</strong> sign in with Google to auto-fill your seller name &amp; email.</span>
-            <a href="/api/auth/google" className="btn btn-google btn-sm">Sign in with Google</a>
+            <a href={`${API_BASE}/auth/google`} className="btn btn-google btn-sm">Sign in with Google</a>
           </div>
         )}
 
