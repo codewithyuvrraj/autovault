@@ -1,6 +1,7 @@
 // API base. Defaults to the relative /api path (proxied to the backend in dev).
 // For a deployed frontend pointed at a hosted API, build with:
-//   VITE_API_URL=https://your-api.example.com npm run build
+//   VITE_API_URL=https://your-api.example.com/api npm run build
+//   (include the /api suffix — every request appends /cars, /categories, etc.)
 // NOTE: cross-origin auth needs the server to allow the frontend origin with
 // credentials (Access-Control-Allow-Credentials) — see server CORS config.
 export const API_BASE = (import.meta.env?.VITE_API_URL || '/api').replace(/\/+$/, '');

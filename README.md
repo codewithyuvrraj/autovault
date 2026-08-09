@@ -126,8 +126,13 @@ copy values from.
 In your Netlify site: **Site settings → Environment variables →** add:
 
 ```
-VITE_API_URL=https://<your-service>.onrender.com
+VITE_API_URL=https://<your-service>.onrender.com/api
 ```
+
+⚠️ **The value must end with `/api`** — every request appends `/cars`, `/categories`,
+etc., and the server routes live under `/api`. A value without `/api` (e.g.
+`https://<your-service>.onrender.com`) makes every call 404 and the site falls back to
+"Live demo mode".
 
 Then trigger a redeploy (or the repo equivalent: add it to `[build.environment]` in
 `netlify.toml` and push). Done — cars, filters, images and Google login all work live.
